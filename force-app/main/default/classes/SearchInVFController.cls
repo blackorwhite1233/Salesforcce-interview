@@ -6,18 +6,18 @@ public class SearchInVFController {
 
     public void search(){
         List<List<SObject>> searchList = [FIND :searchKey IN NAME FIELDS 
-                                      RETURNING Account(ID, Name, Counter__c), Contact(ID, Name, Counter__c)];
+                                            RETURNING Account(ID, Name, Counter__c), Contact(ID, Name, Counter__c)];
 
         Account[] searchAccounts = (Account[])searchList[0];
         Contact[] searchContacts = (Contact[])searchList[1];
 
         acc = new List<wrapAccount>();
         for (Account a : searchAccounts) {
-            acc.add(new wrapAccount(a.Name, 'Account', a.ID, a.Counter__c));
+            acc.add(new wrapAccount(a, 'Account'));
         }
 
         for (Contact c : searchContacts) {
-            acc.add(new wrapAccount(c.Name, 'Contact', c.ID, c.Counter__c));
+            acc.add(new wrapAccount(c, 'Contact'));
         }
     }
 
@@ -57,11 +57,12 @@ public class SearchInVFController {
         public ID rcId {get; set;}
         public Decimal rcCounter {get; set;}
  
-        public wrapAccount(String name, String rcType, ID rcID, Decimal rcCounter) {
-            this.name = name;
+        public wrapAccount(SObject acc, String rcType) {
+            this.name = (String)acc.get('Name');
             this.rcType = rcType;
-            this.rcId = rcId;
-            this.rcCounter = rcCounter != NULL ? rcCounter : 0;
+            this.rcId = (ID)acc.get('ID');
+            Decimal counter = (Decimal)acc.get('Counter__c');
+            this.rcCounter = counter != NULL ? counter : 0;
         }
     }
 }
